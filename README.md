@@ -3,59 +3,150 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-95%25-yellow)
 ![Version](https://img.shields.io/badge/Version-1.0.0-orange)
 
+**UPredictor** is a command-line tool that predicts **Hubbard U and J values** for custom materials using a pretrained ensemble model (Multilayer Perceptron + Random Forest).
 
-**UPredictor** is a command-line tool that predicts **Hubbard U and J values** for custom materials using a pre-trained ensemble model (MLP + RF).  
-It only requires a `.cif` file and the target atomic species — perfect for rapid screening before DFT+U calculations.  
-
----
-
-## 🌍 Overview  
-
-The **Hubbard U parameter** plays a crucial role in correcting electron correlation effects in DFT+U calculations, especially for materials with localized *d* and *f* orbitals.  
-However, obtaining accurate **U values** is **computationally expensive** — often requiring complex linear-response or cDFT calculations.  
-
-➡️ This work employs a **hybrid MLP–Random Forest ensemble model** to **predict Hubbard U** values for **custom materials**.  
-The **Multilayer Perceptron (MLP)** component is a feedforward **neural network** that captures complex nonlinear relationships, while the **Random Forest (RF)** provides robust decision boundaries and interpretable feature importance.  
-Predictions are obtained via a **weighted blending** of MLP and RF outputs, trained on data from the **Materials Project**.
+It requires a `.cif` file and the target atomic species, providing a rapid screening approach before performing computationally expensive DFT+U calculations.
 
 ---
 
-## ⚙️ Workflow  
+## 🌍 Overview
 
-### 1. **Data Source** 🧩
-- Dataset obtained from the [Materials Project](https://materialsproject.org/)
-- Includes chemical compositions, orbital descriptors, and reference Hubbard U values
+The **Hubbard U parameter** plays a crucial role in correcting electron-correlation effects in DFT+U calculations, especially for materials containing localized *d* and *f* orbitals.
 
-### 2. **Feature Engineering** 🧱
-- Extract structural and electronic descriptors using `pymatgen` and `matminer`
-- Apply polynomial feature expansion and data scaling for enhanced representation
-- Prepare feature matrices suitable for both neural and tree-based models
+However, obtaining reliable U values can be computationally expensive, often requiring complex linear-response or constrained DFT calculations.
 
-### 3. **Model Architecture** 🧬
-- **Hybrid MLP–Random Forest Ensemble**
-  - **Multilayer Perceptron (MLP):** a feedforward neural network with:
-    - Multiple fully connected layers (`nn.Linear` in PyTorch)
-    - Nonlinear activation functions (ReLU)
-    - Dropout for regularization
-    - Learns complex nonlinear relationships between input features
-  - **Random Forest (RF):** provides robust decision boundaries and interpretable feature importance
-- Final prediction obtained via a **weighted blending** of MLP and RF outputs
+UPredictor employs a **hybrid MLP–Random Forest ensemble model** to predict Hubbard U and J parameters for custom materials.
 
-### 4. **Training** 🔥
-- Frameworks:
-  - `PyTorch` for the MLP component (neural network)
-  - `scikit-learn` for the Random Forest
-- Loss Metric: **Mean Absolute Error (MAE)**
-- Optimizer: **AdamW** (for the MLP)
-- Model evaluation via **5-fold cross-validation** to ensure robust performance and generalization
+- **Multilayer Perceptron (MLP):** A feedforward neural network designed to capture nonlinear relationships between input descriptors.
+- **Random Forest (RF):** An ensemble learning method that provides robust predictions through multiple decision trees.
+- **Weighted ensemble:** Combines predictions from both models to generate final U and J estimates.
 
-### 5. **Prediction** 🚀
-- Input material features (optionally derived from `.cif` files)
-- The hybrid ensemble predicts the **Hubbard U** parameter within seconds
-- Combines the strengths of both neural and ensemble learning methods for improved accuracy and reliability
+The models were developed using data obtained from the **Materials Project**.
+
+---
+
+## ⚙️ Workflow
+
+### 1. Data Source 🧩
+
+- Dataset obtained from the [Materials Project](https://materialsproject.org/).
+- Includes structural and elemental descriptors alongside reference Hubbard U and J values.
+
+### 2. Feature Engineering 🧱
+
+- Extract structural and elemental properties using `pymatgen`.
+- Calculate descriptors including:
+  - Average nearest-neighbor distance.
+  - Sum of atomic numbers of neighboring atoms.
+  - Electronegativity.
+  - Ionization energy.
+  - Electron affinity.
+- Apply polynomial feature expansion and feature scaling.
+- Prepare feature matrices for both neural-network and tree-based models.
+
+### 3. Model Architecture 🧬
+
+**Hybrid MLP–Random Forest Ensemble**
+
+**Multilayer Perceptron (MLP):**
+- Multiple fully connected layers implemented using PyTorch.
+- ReLU activation functions.
+- Dropout regularization.
+- Learns nonlinear relationships between input descriptors and Hubbard parameters.
+
+**Random Forest (RF):**
+- Implemented using Scikit-learn.
+- Uses 100 decision trees.
+- Captures nonlinear relationships and interactions between input features.
+
+**Ensemble prediction:**
+
+The final prediction is obtained through weighted blending:
+
+\[
+\text{Prediction}_{\text{ensemble}}
+=0.7\,\text{Prediction}_{\text{RF}}
++0.3\,\text{Prediction}_{\text{MLP}}
+\]
+
+The same ensemble weighting is applied to both U and J predictions.
+
+### 4. Training 🔥
+
+- **PyTorch:** MLP implementation.
+- **Scikit-learn:** Random Forest implementation.
+- **MLP loss function:** Mean Squared Error (MSE).
+- **MLP optimizer:** Adam with weight decay.
+- **Random Forest:** 100 estimators, with out-of-bag scoring enabled.
+- **MLP regularization:** Dropout and weight decay.
+- **Early stopping:** Based on training loss.
+
+### 5. Prediction 🚀
+
+- Provide a material structure in CIF format.
+- Specify the target chemical species.
+- Extract the corresponding structural and elemental descriptors.
+- Apply the trained preprocessing transformations.
+- Generate MLP, Random Forest, and ensemble predictions for Hubbard U and J.
+
+---
+
+## 📊 Model Performance
+
+The performance of UPredictor was evaluated using a separate benchmark training and testing experiment.
+
+The benchmark used 603 samples, divided into training and testing subsets using an 80:20 split. Polynomial feature transformation and standardization were fitted exclusively on the training data to prevent test-set information leakage during preprocessing.
+
+**Benchmark configuration**
+
+| Parameter | Configuration |
+|---|---|
+| Dataset size | 603 samples |
+| Training samples | 482 |
+| Testing samples | 121 |
+| Training/testing split | 80:20 |
+| Random state | 42 |
+| Input descriptors | 5 |
+| Polynomial features | Degree 2, interaction-only |
+| Feature scaling | StandardScaler |
+| MLP architecture | 3 hidden layers, 128 neurons each |
+| Random Forest | 100 estimators |
+| Ensemble weighting | 70% RF + 30% MLP |
+
+### 5.1 Hubbard U prediction
+
+| Model | R² | MAE (eV) | MSE (eV²) | RMSE (eV) |
+|---|---:|---:|---:|---:|
+| MLP | 0.9415 | 0.3078 | 0.2043 | 0.4520 |
+| Random Forest | 0.9524 | 0.2688 | 0.1660 | 0.4074 |
+| **Ensemble** | **0.9548** | **0.2648** | **0.1579** | **0.3974** |
+
+### 5.2 Hubbard J prediction
+
+| Model | R² | MAE (eV) | MSE (eV²) | RMSE (eV) |
+|---|---:|---:|---:|---:|
+| MLP | 0.5403 | 0.1164 | 0.0373 | 0.1930 |
+| Random Forest | 0.6410 | 0.1027 | 0.0291 | 0.1706 |
+| **Ensemble** | **0.6462** | **0.1021** | **0.0287** | **0.1693** |
+
+### 5.3 Performance summary
+
+The ensemble model achieved the best overall performance among the three evaluated models for both Hubbard U and J prediction.
+
+Key results:
+
+- **Hubbard U:** R² = 0.9548 and RMSE = 0.3974 eV.
+- **Hubbard J:** R² = 0.6462 and RMSE = 0.1693 eV.
+- The Random Forest model outperformed the MLP when evaluated independently for both targets.
+- Weighted blending of the two models provided modest additional improvements over Random Forest alone.
+
+The results indicate that the current descriptor set captures variations in Hubbard U more effectively than variations in Hubbard J.
+
+**Evaluation note:** These results represent a single reproducible 80:20 holdout benchmark with `random_state=42`. They should not be interpreted as 5-fold cross-validation results or as a statistical estimate of performance across all possible train/test splits.
+
+The benchmark models and evaluation outputs are maintained separately from the original UPredictor v1.0.0 model artifacts.
 
 ---
 
@@ -70,15 +161,17 @@ git clone https://github.com/yourusername/OCGNN-HubbardU.git
 cd OCGNN-HubbardU
 ```
 
-Create and activate a virtual environment:
+Create and activate a virtual environment.
 
 **macOS / Linux**
+
 ```bash
 python3 -m venv jlab_env
 source jlab_env/bin/activate
 ```
 
 **Windows (Command Prompt)**
+
 ```bash
 py -m venv jlab_env
 jlab_env\Scripts\activate
@@ -113,59 +206,73 @@ Follow the interactive prompts to provide the path to your CIF file and the targ
 
 **Note:** Make sure your virtual environment is activated before running UPredictor.
 
+**Startup banner:**
 
-**You’ll see the startup banner:**
-```bash
-       __  ______                ___      __            
-      / / / / __ \________  ____/ (_)____/ /_____  _____
-     / / / / /_/ / ___/ _ \/ __  / / ___/ __/ __ \/ ___/
-    / /_/ / ____/ /  /  __/ /_/ / / /__/ /_/ /_/ / /    
-    \____/_/   /_/   \___/\__,_/_/\___/\__/\____/_/     
-
-                                                    
-    Welcome to the UPredictor ML Engine!
-    ------------------------------------
-```
-**Then follow the interactive prompts:**
-```bash
-    Enter path to CIF file: /path/to/material.cif
-    Enter species to analyze (e.g., Fe, C, Ni): Fe 
+```text
+   Welcome to the UPredictor ML Engine!
+   ------------------------------------
 ```
 
-**After a few seconds, it outputs predictions:**
-```bash
-    Predicted Properties:
-    MLP Prediction (U, J): [4.32, 0.71]
-    RF Prediction (U, J): [4.28, 0.68]
-    Ensemble Prediction (U, J): [4.30, 0.70] 
+**Interactive prompts:**
+
+```text
+Enter path to CIF file: /path/to/material.cif
+Enter species to analyze (e.g., Ag, C, H): Fe
 ```
+
+**Example prediction output:**
+
+```text
+Predicted Properties:
+MLP Prediction (U, J): [4.32, 0.71]
+RF Prediction (U, J): [4.28, 0.68]
+Ensemble Prediction (U, J): [4.30, 0.70]
+```
+
+*The values above are illustrative examples, not measured benchmark results.*
 
 ### ⚠️ 4. Troubleshooting
+
 **Error:**
-```bah
-    FileNotFoundError: './engine/hubbard_uj_poly.pkl' 
+
+```text
+FileNotFoundError: './engine/hubbard_uj_poly.pkl'
 ```
 
 **Solution:**
-    Ensure the engine/ folder exists in the same directory where you run the command and includes:
-```bash
-    engine/
-     ├── hubbard_uj_poly.pkl
-     ├── hubbard_uj_scaler.pkl
-     ├── hubbard_uj_rf.pkl
-     └── hubbard_uj_mlp.pth
- ```
+
+Ensure the `engine/` folder exists in the project directory and includes:
+
+```text
+engine/
+├── hubbard_uj_poly.pkl
+├── hubbard_uj_scaler.pkl
+├── hubbard_uj_rf.pkl
+└── hubbard_uj_mlp.pth
+```
 
 ### 💡 5. Tip
 
-        UPredictor works offline after setup and supports any CIF file compatible with pymatgen.
-    
+UPredictor works offline after installation and supports CIF files compatible with `pymatgen`.
+
 ### 🧩 6. Example Workflow
 
-        Prepare your custom .cif file.
-        Run upredictor from the terminal.
-        Enter:
-        The path to your CIF file
-        The target species (e.g., Fe, C, Ni)
-        Get instant predictions for Hubbard U and J.
+1. Prepare your custom `.cif` file.
+2. Run `upredictor` from the terminal.
+3. Enter the path to your CIF file.
+4. Specify the target atomic species (e.g., Fe, C, Ni).
+5. Obtain predicted Hubbard U and J values from the MLP, Random Forest, and ensemble models.
 
+---
+
+## 📌 Future Development
+
+Potential future improvements include:
+
+- Expanded training datasets.
+- Improved prediction accuracy for Hubbard J.
+- Validation using repeated train/test splits and cross-validation.
+- Additional structural and electronic descriptors.
+- Integration with automated computational materials workflows.
+
+---
