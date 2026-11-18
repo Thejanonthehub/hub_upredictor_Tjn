@@ -59,31 +59,59 @@ Predictions are obtained via a **weighted blending** of MLP and RF outputs, trai
 
 ---
 
-## 🚀 Quick Start  
+## 🚀 Quick Start
 
-### 🧩 1. Clone & Setup  
+### 🧩 1. Clone & Setup
+
+Clone the repository and navigate to the project directory:
+
 ```bash
-    git clone https://github.com/yourusername/OCGNN-HubbardU.git
-    cd OCGNN-HubbardU
-    python3 -m venv jlab_env
-    source jlab_env/bin/activate      # macOS/Linux
-    jlab_env\Scripts\activate       # Windows
-
-    pip install -r requirements.txt 
+git clone https://github.com/yourusername/OCGNN-HubbardU.git
+cd OCGNN-HubbardU
 ```
 
-###  ⚙️ 2. Install the CLI Tool
-**From inside the project directory, run:**
+Create and activate a virtual environment:
 
-```bash 
-    pip install -e . 
+**macOS / Linux**
+```bash
+python3 -m venv jlab_env
+source jlab_env/bin/activate
 ```
 
-    This registers the command-line interface upredictor, allowing you to run it anywhere.
+**Windows (Command Prompt)**
+```bash
+py -m venv jlab_env
+jlab_env\Scripts\activate
+```
+
+Install the required dependencies:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### ⚙️ 2. Install the CLI Tool
+
+From inside the project directory, install UPredictor:
+
+```bash
+python -m pip install .
+```
+
+This installs UPredictor and registers the `upredictor` command-line interface, allowing you to launch the application from anywhere within the activated virtual environment.
 
 ### 🧠 3. Run the Predictor
 
-    Simply type:  ```bash upredictor``` 
+Simply type:
+
+```bash
+upredictor
+```
+
+Follow the interactive prompts to provide the path to your CIF file and the target chemical element.
+
+**Note:** Make sure your virtual environment is activated before running UPredictor.
 
 
 **You’ll see the startup banner:**
