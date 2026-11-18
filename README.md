@@ -157,8 +157,8 @@ The benchmark models and evaluation outputs are maintained separately from the o
 Clone the repository and navigate to the project directory:
 
 ```bash
-git clone https://github.com/yourusername/OCGNN-HubbardU.git
-cd OCGNN-HubbardU
+git clone https://github.com/Thejanonthehub/hub_upredictor_Tjn.git
+cd hub_upredictor_Tjn
 ```
 
 Create and activate a virtual environment.
@@ -166,15 +166,15 @@ Create and activate a virtual environment.
 **macOS / Linux**
 
 ```bash
-python3 -m venv jlab_env
-source jlab_env/bin/activate
+python3 -m venv upd_env
+source upd_env/bin/activate
 ```
 
 **Windows (Command Prompt)**
 
 ```bash
-py -m venv jlab_env
-jlab_env\Scripts\activate
+py -m venv upd_env
+upd_env\Scripts\activate
 ```
 
 Install the required dependencies:
@@ -209,6 +209,12 @@ Follow the interactive prompts to provide the path to your CIF file and the targ
 **Startup banner:**
 
 ```text
+   __  ______                ___      __            
+      / / / / __ \________  ____/ (_)____/ /_____  _____
+     / / / / /_/ / ___/ _ \/ __  / / ___/ __/ __ \/ ___/
+    / /_/ / ____/ /  /  __/ /_/ / / /__/ /_/ /_/ / /    
+    \____/_/   /_/   \___/\__,_/_/\___/\__/\____/_/     
+
    Welcome to the UPredictor ML Engine!
    ------------------------------------
 ```
